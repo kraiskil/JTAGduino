@@ -66,6 +66,8 @@ int jtag_pin_map[N_JTAG_PINS] = { 2, 3, 4, 5, 6 };
 const int jtag_pin_dir[N_JTAG_PINS] = { OUTPUT, OUTPUT, OUTPUT, INPUT, OUTPUT };
 unsigned long jtag_last_tck_micros;
 unsigned long jtag_min_tck_micros;
+/* WARNING & TODO: not all arduinos have a LED on pin 13 */
+int ledPin = 13;
 
 void jtag_setup() {
   int i_pin;
@@ -201,6 +203,13 @@ int jtag_sequence(unsigned int n, const byte *tms, const byte *tdi, byte *tdo) {
   }
   return JTAG_NO_ERROR;
 }
+void set_led(byte onoff)
+{
+  if(onoff)
+    digitalWrite(ledPin, HIGH);
+  else
+    digitalWrite(ledPin, LOW);
+}
 
 /* JTAGduino command protocol */
 
@@ -219,6 +228,7 @@ enum jtagduino_cmd {
   CMD_SET_JTAG_SPEED = 0x20,
   CMD_JTAG_CLOCK = 0x21,
   CMD_JTAG_SEQUENCE = 0x22,
+  CMD_LED = 0x23,
 };
 
 enum jtagduino_rsp {
@@ -294,6 +304,7 @@ int jtagduino_parse(byte c) {
         case CMD_SET_JTAG_SPEED:
         case CMD_JTAG_CLOCK:
         case CMD_JTAG_SEQUENCE:
+        case CMD_LED:
           cmd[0] = c;
           n_rx_bytes = 1;
           parse_state = PARSE_STATE_CMD;
@@ -473,6 +484,14 @@ int jtagduino_parse(byte c) {
             }
           } while(0);
           break;
+        case CMD_LED:
+          if(n_rx_bytes == 2 ) {
+            set_led(cmd[1]);
+            rsp[0]=0;
+            rsp_len=1;
+            n_rx_bytes=0;
+          }
+          break;
         default:
           parse_state = PARSE_STATE_IDLE;
           n_rx_bytes = 0;
@@ -493,6 +512,7 @@ void setup() {
   jtag_setup();
   jtagduino_setup();
   Serial.begin(DEFAULT_BAUD_RATE);
+  pinMode(ledPin, OUTPUT);
 }
 
 void loop() {

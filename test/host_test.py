@@ -22,7 +22,7 @@
 # In Debian-based distribution, you need to install python-serial package.
 # This script has been tested with python version 2.6.7
 
-import sys
+import sys, time
 from jtagduino import *
 
 jtagduino_port = '/dev/ttyACM0'
@@ -33,7 +33,7 @@ device = jtagduino(jtagduino_port)
 
 print 'if_ver_major = %d; if_ver_minor = %d' % device.if_ver()
 print 'fw_ver_major = %d; fw_ver_minor = %d' % device.fw_ver()
-print 'set_serial_speed(115200) = %d' % device.set_serial_speed(115200)
+#print 'set_serial_speed(115200) = %d' % device.set_serial_speed(115200)
 print 'clear pin TDI rsp = %d' % device.clear_pin(jtag_pins.TDI)
 print 'set pin TDI rsp = %d' % device.set_pin(jtag_pins.TDI)
 print 'get pin TDO rsp = %d; val = %d' % device.get_pin(jtag_pins.TDO)
@@ -46,6 +46,12 @@ print ('jtag_sequence([1] * 255, [1] * 255), rsp = %d;' % rsp) + ' tdo_seq = ' +
 print 'device.set_jtag_speed(1) = %d' % device.set_jtag_speed(1)
 (rsp, tdo_seq) = device.jtag_sequence([1] * 255, [1] * 255)
 print ('jtag_sequence([1] * 255, [1] * 255), rsp = %d;' % rsp) + ' tdo_seq = ' + str(tdo_seq)
+print ('setting led on')
+device.led(1)
+time.sleep(5)
+print ('setting led off')
+device.led(0)
+
 sys.exit(0);
 
 #TODO: other commands

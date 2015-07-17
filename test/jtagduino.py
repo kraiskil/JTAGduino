@@ -32,6 +32,7 @@ class jtagduino_cmd:
     CMD_SET_JTAG_SPEED = 0x20
     CMD_JTAG_CLOCK = 0x21
     CMD_JTAG_SEQUENCE = 0x22
+    CMD_LED = 0x23
 
 class jtagduino_rsp:
     RSP_OK = 0
@@ -189,5 +190,9 @@ class jtagduino:
                     tdo_seq.append(0)
                 i_seq += 1
         return (rsp, tdo_seq)
-        
+    def led(self, onoff):
+        self.ser.write(chr(jtagduino_cmd.CMD_LED))
+        self.ser.write(chr(onoff))
+        rsp = ord(self.ser.read(1))
+        return rsp
 
